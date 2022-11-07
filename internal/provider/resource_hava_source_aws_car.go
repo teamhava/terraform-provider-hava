@@ -65,7 +65,8 @@ func resourceHavaSourceAWSCAR() *schema.Resource {
 }
 
 func resourceSourceAWSCARCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	// use the meta value to retrieve your client from the provider configure method
+	tflog.Info(ctx, "creating")
+
 	client := meta.(*havaclient.APIClient)
 	
 	name := d.Get("name").(string)
@@ -104,45 +105,27 @@ func resourceSourceAWSCARCreate(ctx context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 
-	// tflog.Info(ctx, (*res).Status)
-	
-	// if (*res).StatusCode != 200 {
-	// 	return diag.Errorf("Hava API responded with a %d status code", res.StatusCode)
-	// }
-
-
 	d.SetId(*source.Id)
 	d.Set("state", source.State)
 
-	// write logs using the tflog package
-	// see https://pkg.go.dev/github.com/hashicorp/terraform-plugin-log/tflog
-	// for more information
 	tflog.Trace(ctx, "created a resource")
-
-	// return diag.Errorf("create not implemented")
 
 	return nil
 }
 
 func resourceSourceAWSCARRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	
+	tflog.Info(ctx, "reading")
+
 	client := meta.(*havaclient.APIClient)
 
 	req := client.SourcesApi.SourcesShow(ctx, d.Id())
 	source, res, err := req.Execute()
-
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
 	tflog.Info(ctx, res.Status)
-
-	// the source has been deleted if stat is archived
-	// if(*source.State == "archived") {
-		
-	// 	return diag.Errorf("The source '%s' has been archived and is not available, please update the state file entry")
-	// }
 
 	d.Set("name", source.Name)
 	d.Set("state", source.State)
@@ -151,7 +134,7 @@ func resourceSourceAWSCARRead(ctx context.Context, d *schema.ResourceData, meta 
 }
 
 func resourceSourceAWSCARUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	
+	tflog.Info(ctx, "updating")
 	client := meta.(*havaclient.APIClient)
 
 	name := d.Get("name").(string)
@@ -182,7 +165,8 @@ func resourceSourceAWSCARUpdate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceSourceAWSCARDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	
+	tflog.Info(ctx, "deleting")
+
 	client := meta.(*havaclient.APIClient)
 
 	req := client.SourcesApi.SourcesDestroy(ctx, d.Id())
