@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/teamhava/hava-sdk-go/havaclient"
 )
@@ -40,7 +41,26 @@ func resourceHavaSourceAWSCAR() *schema.Resource {
 				Type: schema.TypeString,
 				Required: true,
 			},
+			"state": {
+				Description: "State of the Source",
+				Type: schema.TypeString,
+				Computed: true,
+			},
 		},
+		CustomizeDiff: customdiff.All(
+
+			// if state is set to archived, it has been deleted outside of terraform and a new resource needs to be created
+			customdiff.ForceNewIf("state", func(ctx context.Context, d *schema.ResourceDiff, meta interface{}) bool {
+				state := d.Get("state").(string)
+
+				if state == "archived" {
+					tflog.Info(ctx, fmt.Sprintf("Source '%s' was deleted outside of terraform, a new resource will be created in it's place", d.Id()))
+					d.SetNewComputed("state")
+					return true
+				}
+				return false
+			}),
+		),
 	}
 }
 
@@ -92,6 +112,7 @@ func resourceSourceAWSCARCreate(ctx context.Context, d *schema.ResourceData, met
 
 
 	d.SetId(*source.Id)
+	d.Set("state", source.State)
 
 	// write logs using the tflog package
 	// see https://pkg.go.dev/github.com/hashicorp/terraform-plugin-log/tflog
@@ -108,14 +129,23 @@ func resourceSourceAWSCARRead(ctx context.Context, d *schema.ResourceData, meta 
 	client := meta.(*havaclient.APIClient)
 
 	req := client.SourcesApi.SourcesShow(ctx, d.Id())
-	source, _, err := req.Execute()
+	source, res, err := req.Execute()
 
 
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
+	tflog.Info(ctx, res.Status)
+
+	// the source has been deleted if stat is archived
+	// if(*source.State == "archived") {
+		
+	// 	return diag.Errorf("The source '%s' has been archived and is not available, please update the state file entry")
+	// }
+
 	d.Set("name", source.Name)
+	d.Set("state", source.State)
 
 	return nil
 }
