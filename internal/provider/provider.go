@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/teamhava/hava-sdk-go/havaclient"
 )
 
 func init() {
@@ -31,6 +32,14 @@ func New(version string) func() *schema.Provider {
 			},
 			ResourcesMap: map[string]*schema.Resource{
 				"scaffolding_resource": resourceScaffolding(),
+				"hava_source_aws_car_resource": resourceHavaSourceAWSCAR(),
+			},
+			Schema: map[string]*schema.Schema{
+				"api_token": &schema.Schema{
+					Type:        schema.TypeString,
+					Optional:    true,
+					DefaultFunc: schema.EnvDefaultFunc("HAVA_TOKEN", nil),
+      	},
 			},
 		}
 
@@ -40,18 +49,23 @@ func New(version string) func() *schema.Provider {
 	}
 }
 
-type apiClient struct {
-	// Add whatever fields, client or connection info, etc. here
-	// you would need to setup to communicate with the upstream
-	// API.
-}
-
 func configure(version string, p *schema.Provider) func(context.Context, *schema.ResourceData) (any, diag.Diagnostics) {
-	return func(context.Context, *schema.ResourceData) (any, diag.Diagnostics) {
-		// Setup a User-Agent for your API client (replace the provider name for yours):
-		// userAgent := p.UserAgent("terraform-provider-scaffolding", version)
-		// TODO: myClient.UserAgent = userAgent
+	return func(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 
-		return &apiClient{}, nil
+		token, ok := d.GetOk("api_token")
+
+		if !ok {
+			return nil, diag.Errorf("api token not found, did you set the 'HAVA_TOKEN' environment variable")
+		}
+
+		cfg := havaclient.NewConfiguration()
+
+		cfg.UserAgent = p.UserAgent("terraform-provider-hava", version)
+
+		cfg.DefaultHeader["Authorization"] = "Bearer " + token.(string)
+
+		myclient := havaclient.NewAPIClient(cfg)
+
+		return myclient, nil
 	}
 }
