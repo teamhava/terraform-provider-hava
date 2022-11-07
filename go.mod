@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/terraform-plugin-docs v0.13.0
 	github.com/hashicorp/terraform-plugin-log v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.0
-	github.com/teamhava/hava-sdk-go/havaclient v0.0.0-20221107024844-ba8a1e09d682
+	github.com/teamhava/hava-sdk-go/havaclient v0.0.0-20221107070903-0338c919d0f4
 )
 
 require (

@@ -312,6 +312,10 @@ github.com/teamhava/hava-sdk-go/havaclient v0.0.0-20221107010943-69f6d521b89b h1
 github.com/teamhava/hava-sdk-go/havaclient v0.0.0-20221107010943-69f6d521b89b/go.mod h1:N41CTgvOgxBs4UpzJd2t4UnwhHPR0vWnIUFiNATHGuw=
 github.com/teamhava/hava-sdk-go/havaclient v0.0.0-20221107024844-ba8a1e09d682 h1:RYAamyikdFGO/HoQB1CX5Uyx5aePCjvKp6ditDNuTW8=
 github.com/teamhava/hava-sdk-go/havaclient v0.0.0-20221107024844-ba8a1e09d682/go.mod h1:4xl4NJdIBG1JTZrqW7kE2AcHla+NwnVe/kjLg5o2Jlo=
+github.com/teamhava/hava-sdk-go/havaclient v0.0.0-20221107063119-95b9e857b897 h1:JrDobawT02OqDagXqUJiVrWLWHI2KBrbbyFKYCiF0y4=
+github.com/teamhava/hava-sdk-go/havaclient v0.0.0-20221107063119-95b9e857b897/go.mod h1:D+2R18S8Zpy6KKkBRt4xrXgdIrUJkZMTFLlcKlQ0/OY=
+github.com/teamhava/hava-sdk-go/havaclient v0.0.0-20221107070903-0338c919d0f4 h1:J/Oak6fK3RmvBM9TqnFkuJ8BVU/oR81hpZWgR9qGuwk=
+github.com/teamhava/hava-sdk-go/havaclient v0.0.0-20221107070903-0338c919d0f4/go.mod h1:D+2R18S8Zpy6KKkBRt4xrXgdIrUJkZMTFLlcKlQ0/OY=
 github.com/vmihailenco/msgpack v3.3.3+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=
 github.com/vmihailenco/msgpack v4.0.4+incompatible h1:dSLoQfGFAo3F6OoNhwUmLwVgaUXK79GlxNBwueZn0xI=
 github.com/vmihailenco/msgpack v4.0.4+incompatible/go.mod h1:fy3FlTQTDXWkZ7Bh6AcGMlsjHatGryHQYUTf1ShIgkk=

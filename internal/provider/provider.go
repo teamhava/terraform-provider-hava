@@ -33,9 +33,10 @@ func New(version string) func() *schema.Provider {
 			ResourcesMap: map[string]*schema.Resource{
 				"scaffolding_resource": resourceScaffolding(),
 				"hava_source_aws_car_resource": resourceHavaSourceAWSCAR(),
+				"hava_source_aws_key_resource": resourceHavaSourceAWSKey(),
 			},
 			Schema: map[string]*schema.Schema{
-				"api_token": &schema.Schema{
+				"api_token": {
 					Type:        schema.TypeString,
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("HAVA_TOKEN", nil),
