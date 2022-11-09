@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/teamhava/hava-sdk-go/havaclient"
+	havaclient "github.com/teamhava/hava-sdk-go"
 )
 
 func init() {
@@ -27,14 +27,14 @@ func init() {
 func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
+			
 			DataSourcesMap: map[string]*schema.Resource{
-				"scaffolding_data_source": dataSourceScaffolding(),
 			},
 			ResourcesMap: map[string]*schema.Resource{
-				"scaffolding_resource":                   resourceScaffolding(),
 				"hava_source_aws_car_resource":           resourceHavaSourceAWSCAR(),
 				"hava_source_aws_key_resource":           resourceHavaSourceAWSKey(),
 				"hava_source_azure_credentials_resource": resourceHavaSourceAzureCredentials(),
+				"hava_source_gcp_sa_credentials_resource": resourceHavaSourceGCPCredentials(),
 			},
 			Schema: map[string]*schema.Schema{
 				"api_token": {

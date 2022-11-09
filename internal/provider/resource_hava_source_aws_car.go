@@ -9,13 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/teamhava/hava-sdk-go/havaclient"
+	havaclient "github.com/teamhava/hava-sdk-go"
 )
 
 func resourceHavaSourceAWSCAR() *schema.Resource {
 	return &schema.Resource{
 		// This description is used by the documentation generator and the language server.
-		Description: "Sample resource in the Terraform provider scaffolding.",
+		Description: "A Source in Hava using an AWS cross-account role to authenticate to the AWS account that will be imported.",
 
 		CreateContext: resourceSourceAWSCARCreate,
 		ReadContext:   resourceSourceAWSCARRead,

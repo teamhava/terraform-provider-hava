@@ -11,15 +11,15 @@ import (
 	havaclient "github.com/teamhava/hava-sdk-go"
 )
 
-func resourceHavaSourceAzureCredentials() *schema.Resource {
+func resourceHavaSourceGCPCredentials() *schema.Resource {
 	return &schema.Resource{
 		// This description is used by the documentation generator and the language server.
-		Description: "A Source in Hava using an Azure service principal to authenticate to the Azure subscription that will be imported.",
+		Description: "A Source in Hava using an Google service account to authenticate to the GCP project that will be imported.",
 
-		CreateContext: resourceSourceAzureCredentialsCreate,
-		ReadContext:   resourceSourceAzureCredentialsRead,
-		UpdateContext: resourceSourceAzureCredentialsUpdate,
-		DeleteContext: resourceSourceAzureCredentialsDelete,
+		CreateContext: resourceSourceGCPCredentialsCreate,
+		ReadContext:   resourceSourceGCPCredentialsRead,
+		UpdateContext: resourceSourceGCPCredentialsUpdate,
+		DeleteContext: resourceSourceGCPCredentialsDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -28,26 +28,8 @@ func resourceHavaSourceAzureCredentials() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 			},
-			"subscription_id": {
-				Description: "The id of the azure subscription that will be accessed to import the data",
-				Sensitive:   true,
-				Type:        schema.TypeString,
-				Required:    true,
-			},
-			"tenant_id": {
-				Description: "The id of the azure tenant that will be accessed to import the data",
-				Sensitive:   true,
-				Type:        schema.TypeString,
-				Required:    true,
-			},
-			"client_id": {
-				Description: "The id of client that will be used to access the source for import",
-				Sensitive:   true,
-				Type:        schema.TypeString,
-				Required:    true,
-			},
-			"secret_key": {
-				Description: "The azure secret key of the client that will be used to access the source for import",
+			"encoded_file": {
+				Description: "Base64 encoded json Service Account credentials file content",
 				Sensitive:   true,
 				Type:        schema.TypeString,
 				Required:    true,
@@ -75,28 +57,22 @@ func resourceHavaSourceAzureCredentials() *schema.Resource {
 	}
 }
 
-func resourceSourceAzureCredentialsCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceSourceGCPCredentialsCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	tflog.Info(ctx, "creating")
 
 	client := meta.(*havaclient.APIClient)
 
 	name := d.Get("name").(string)
-	azureType := "Azure::Credentials"
-	subId := d.Get("subscription_id").(string)
-	tenantId := d.Get("tenant_id").(string)
-	clientId := d.Get("client_id").(string)
-	secretKey := d.Get("secret_key").(string)
+	gcpType := "GCP::ServiceAccountCredentials"
+	encodedFile := d.Get("encoded_file").(string)
 
-	azureCredentialsSource := &havaclient.SourcesAzureCredentials{
+	gcpCredentialsSource := &havaclient.SourcesGCPServiceAccountCredentials{
 		Name:           &name,
-		Type:           &azureType,
-		SubscriptionId: &subId,
-		TenantId:       &tenantId,
-		ClientId:       &clientId,
-		SecretKey:      &secretKey,
+		Type:           &gcpType,
+		EncodedFile: &encodedFile,
 	}
 
-	body := havaclient.SourcesAzureCredentialsAsSourcesCreateRequest(azureCredentialsSource)
+	body := havaclient.SourcesGCPServiceAccountCredentialsAsSourcesCreateRequest(gcpCredentialsSource)
 
 	req := client.SourcesApi.SourcesCreate(ctx)
 
@@ -114,7 +90,7 @@ func resourceSourceAzureCredentialsCreate(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceSourceAzureCredentialsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceSourceGCPCredentialsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	tflog.Info(ctx, "reading")
 
 	client := meta.(*havaclient.APIClient)
@@ -134,27 +110,21 @@ func resourceSourceAzureCredentialsRead(ctx context.Context, d *schema.ResourceD
 	return nil
 }
 
-func resourceSourceAzureCredentialsUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceSourceGCPCredentialsUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	tflog.Info(ctx, "updating")
 	client := meta.(*havaclient.APIClient)
 
 	name := d.Get("name").(string)
-	azureType := "Azure::Credentials"
-	subId := d.Get("subscription_id").(string)
-	tenantId := d.Get("tenant_id").(string)
-	clientId := d.Get("client_id").(string)
-	secretKey := d.Get("secret_key").(string)
+	gcpType := "GCP::ServiceAccountCredentials"
+	encodedFile := d.Get("encoded_file").(string)
 
-	azureCredentialsSource := &havaclient.SourcesAzureCredentials{
+	gcpCredentialsSource := &havaclient.SourcesGCPServiceAccountCredentials{
 		Name:           &name,
-		Type:           &azureType,
-		SubscriptionId: &subId,
-		TenantId:       &tenantId,
-		ClientId:       &clientId,
-		SecretKey:      &secretKey,
+		Type:           &gcpType,
+		EncodedFile: &encodedFile,
 	}
 
-	sourceUpdateRequest := havaclient.SourcesAzureCredentialsAsSourcesUpdateRequest(azureCredentialsSource)
+	sourceUpdateRequest := havaclient.SourcesGCPServiceAccountCredentialsAsSourcesUpdateRequest(gcpCredentialsSource)
 
 	req := client.SourcesApi.SourcesUpdate(ctx, d.Id())
 
@@ -169,7 +139,7 @@ func resourceSourceAzureCredentialsUpdate(ctx context.Context, d *schema.Resourc
 	return nil
 }
 
-func resourceSourceAzureCredentialsDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceSourceGCPCredentialsDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	tflog.Info(ctx, "deleting")
 
 	client := meta.(*havaclient.APIClient)
