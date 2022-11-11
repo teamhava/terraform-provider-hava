@@ -17,7 +17,7 @@ Hava uses an API token to authenticate to the API, this can either be passed to 
 
 Setting the attribute directly takes precedence over the environment variable, but using the environment variable is considered more secure as it will not be commited to source control.
 
-Details on how to get an API token can be found in the (Hava developer documentation)[https://developer.hava.io/api/authentication].
+Details on how to get an API token can be found in the [Hava developer documentation](https://developer.hava.io/api/authentication).
 
 ## Example Usage
 ```tf
