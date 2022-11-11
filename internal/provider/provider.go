@@ -38,9 +38,16 @@ func New(version string) func() *schema.Provider {
 			},
 			Schema: map[string]*schema.Schema{
 				"api_token": {
+					Description: "The API token to authenticate with the Hava API. This takes precedence over the 'HAVA_TOKEN' environment variable.",
 					Type:        schema.TypeString,
 					Optional:    true,
 					DefaultFunc: schema.EnvDefaultFunc("HAVA_TOKEN", nil),
+				},
+				"endpoint": {
+					Description: "Which API endpoint to connect to. This is primarily used to support self-hosted users that does not use the default SaaS API endpoints",
+					Type:	schema.TypeString,
+					Optional: true,
+					Default: "https://api.hava.io",
 				},
 			},
 		}
@@ -55,12 +62,19 @@ func configure(version string, p *schema.Provider) func(context.Context, *schema
 	return func(ctx context.Context, d *schema.ResourceData) (any, diag.Diagnostics) {
 
 		token, ok := d.GetOk("api_token")
+		endpoint := d.Get("endpoint").(string)
 
 		if !ok {
 			return nil, diag.Errorf("api token not found, did you set the 'HAVA_TOKEN' environment variable")
 		}
 
 		cfg := havaclient.NewConfiguration()
+		cfg.Servers = havaclient.ServerConfigurations{
+			{
+				URL: endpoint,
+				Description: "No description provided",
+			},
+		}
 
 		cfg.UserAgent = p.UserAgent("terraform-provider-hava", version)
 
