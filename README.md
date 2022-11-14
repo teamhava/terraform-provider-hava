@@ -1,64 +1,95 @@
-# Terraform Provider Scaffolding (Terraform Plugin SDK)
+# Hava Terraform Provider
 
-_This template repository is built on the [Terraform Plugin SDK](https://github.com/hashicorp/terraform-plugin-sdk). The template repository built on the [Terraform Plugin Framework](https://github.com/hashicorp/terraform-plugin-framework) can be found at [terraform-provider-scaffolding-framework](https://github.com/hashicorp/terraform-provider-scaffolding-framework). See [Which SDK Should I Use?](https://www.terraform.io/docs/plugin/which-sdk.html) in the Terraform documentation for additional information._
+The Hava Terraform provider makes it simple to integrate Hava into your GitOps workflows, allowing you to add your cloud environments to Hava for automatic documentation together with the infrastructure of code you use to manage those environments.
 
-This repository is a *template* for a [Terraform](https://www.terraform.io) provider. It is intended as a starting point for creating Terraform providers, containing:
+This provider is built and tested with Terraform v1.3.4 or later
 
- - A resource, and a data source (`internal/provider/`),
- - Examples (`examples/`) and generated documentation (`docs/`),
- - Miscellaneous meta files.
- 
-These files contain boilerplate code that you will need to edit to create your own Terraform provider. Tutorials for creating Terraform providers can be found on the [HashiCorp Learn](https://learn.hashicorp.com/collections/terraform/providers) platform.
+- [Terraform Website](https://www.terraform.io/)
+- [Hava Provider Documentation](https://registry.terraform.io/providers/teamhava/hava/latest/docs)
 
-Please see the [GitHub template repository documentation](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template) for how to create a new repository from this template on GitHub.
+## Usage Example
+The below example show how the Terraform provider can be used to configure an AWS account source using a cross account role.
 
-Once you've written your provider, you'll want to [publish it on the Terraform Registry](https://www.terraform.io/docs/registry/providers/publishing.html) so that others can use it.
+```hcl
+terraform {
+  required_providers {
+    hava = {
+      source = "teamhava/hava"
+      version = "~> 0.1"
+    }
 
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 4.39"
+    }
+  }
+}
 
-## Requirements
+// Get the ARN for the AWS Read Only Managed Policy
+data "aws_iam_policy" "example" {
+  name = "ReadOnlyAccess"
+}
 
--	[Terraform](https://www.terraform.io/downloads.html) >= 0.13.x
--	[Go](https://golang.org/doc/install) >= 1.18
+// Create the role that will be used for cross account role accesss
+resource "aws_iam_role" "hava_ro" {
+  name                = "hava-read-only-role"
+  assume_role_policy  = jsonencode({
+      "Version": "2012-10-17",
+      "Statement": [
+          {
+              "Effect": "Allow",
+              "Principal": {
+                  // Hava CAR account
+                  "AWS": "arn:aws:iam::281013829959:root"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                  "StringEquals": {
+                      // unique id for your Hava account, 
+                      "sts:ExternalId": var.external_id
+                  }
+              }
+          }
+      ]
+    })
+  
+  managed_policy_arns = [data.aws_iam_policy.example.arn]
+}
 
-## Building The Provider
-
-1. Clone the repository
-1. Enter the repository directory
-1. Build the provider using the Go `install` command: 
-```sh
-$ go install
+// 
+resource "hava_source_aws_car_resource" "example" {
+  name        = "Example Source"
+  role_arn    = aws_iam_role.hava_ro.arn 
+  external_id = var.external_id
+}
 ```
 
-## Adding Dependencies
+## Developer Requirements
 
-This provider uses [Go modules](https://github.com/golang/go/wiki/Modules).
-Please see the Go documentation for the most up to date information about using Go modules.
+This repository uses developer containers to make sure everyone has the same development environment. It's highly recommended to use the included containers.
 
-To add a new dependency `github.com/author/dependency` to your Terraform provider:
+### Dependencies
 
-```
-go get github.com/author/dependency
-go mod tidy
-```
+- Golang 1.19
+- Terraform v1.3.4
 
-Then commit the changes to `go.mod` and `go.sum`.
+### Environment setup
 
-## Using the provider
+To effectively develop a terraform provider, you need to be able to test it locally. Hashicorp has an config file `~/.terraformrc` that lives in your home directory, where you can override certain things, like where to download the provider from.
 
-Fill this in for each provider
+The bellow config file overrides the path to look for the `teamhava/hava provider` to look in the golang bin folder `/go/bin`. This allows us to run `go install` to compile our provider, and it will be compiled into the bin directory or us to use it when executing terraform.
 
-## Developing the Provider
+```hcl
+provider_installation {
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (see [Requirements](#requirements) above).
+  dev_overrides {
+      "registry.terraform.io/teamhava/hava" = "/go/bin/"
+  }
 
-To compile the provider, run `go install`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
+  # For all other providers, install them directly from their origin provider
+  # registries as normal. If you omit this, Terraform will _only_ use
+  # the dev_overrides block, and so no other providers will be available.
+  direct {}
+}
 
-To generate or update documentation, run `go generate`.
-
-In order to run the full suite of Acceptance tests, run `make testacc`.
-
-*Note:* Acceptance tests create real resources, and often cost money to run.
-
-```sh
-$ make testacc
 ```
